@@ -8,13 +8,16 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     face_120 = faces(120,:);
     mean_face = mean(faces,1);  
 
+    [n, d] = size(faces);
     %% Compute mean face and the covariance matrix of faces
-    % compute X_tilde1
-    %%%%% TODO
-    
+    % compute X_tilde
+    mu_x = mean(faces',2);
+    one_n = ones(n,1);
+    %X_tilde is the mean face
+    X_tilde = faces' - mu_x*one_n'; %mean-centered feature vector, should be d x n = 10304 x 400
     % Compute covariance matrix using X_tilde
-    %%%%% TODO
-    
+    %Sx is the covariance matrix
+    Sx = (1/n) * X_tilde * X_tilde'; %size should be d x d = 10304 x 10304
     %% Compute the eigenvalue decomposition of the covariance matrix
     %%%%% TODO
     
