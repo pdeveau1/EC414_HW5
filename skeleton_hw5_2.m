@@ -3,7 +3,10 @@ function [lambda_top5, k_] = skeleton_hw5_2()
 %% Load AT&T Face dataset
     img_size = [112,92];   % image size (rows,columns)
     % Load the AT&T Face data set using load_faces()
-    %%%%% TODO
+    [faces] = load_faces();
+    %image #120 in the data set
+    face_120 = faces(120,:);
+    mean_face = mean(faces,1);  
 
     %% Compute mean face and the covariance matrix of faces
     % compute X_tilde1
@@ -28,11 +31,12 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     % Visualize image number 120 in the dataset
     % practice using subplots for later parts
     subplot(1,2,1)
-    %%%%% TODO
-    
+    imshow(uint8(reshape(face_120, img_size)));
+    title('Image #120 in the Dataset');
     % Visualize the mean face image
     subplot(1,2,2)
-    %%%%% TODO
+    imshow(uint8(reshape(mean_face, img_size)));
+    title('Mean Face of the Dataset');
     
 %% Q5.2 b) Analysing computed eigenvalues
     warning('off')
