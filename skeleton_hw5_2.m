@@ -1,4 +1,4 @@
-function [lambda_top5, k_] = skeleton_hw5_2()
+%function [lambda_top5, k_] = skeleton_hw5_2()
 %% Q5.2
 %% Load AT&T Face dataset
     img_size = [112,92];   % image size (rows,columns)
@@ -22,7 +22,7 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     %D = eig(Sx, 'matrix'); %eigenvalues in a diagonal matrix.
     [V,D] = eig(Sx); %diagonal matrix D of eigenvalues and matrix V whose columns are the corresponding right eigenvectors, so that A*V = V*D
     %% Sort the eigenvalues and their corresponding eigenvectors construct the U and Lambda matrices
-    [d,ind] = sort(diag(D)); %sort eigenvalues and get corresponding indices
+    [d,ind] = sort(diag(D),'descend'); %sort eigenvalues and get corresponding indices
     Ds = D(ind,ind); %reorder eigenvalues in diagonal matrix
     Vs = V(:,ind); %reorder eigenvectors
 
@@ -50,22 +50,35 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     warning('off')
     
     % Report the top 5 eigenvalues
-    % lambda_top5 = ?; %%%%% TODO
-    
+    lambda_top5 = d(1:5); 
+    fprintf('The top 5 eigenvalues are \n');
+    disp(lambda_top5);
+
     % Plot the eigenvalues in from largest to smallest
-    k = 1:d;
+    k = 1:450;
     figure(2)
     sgtitle('Eigenvalues from largest to smallest')
 
     % Plot the eigenvalue number k against k
-    subplot(1,2,1)
-    %%%%% TODO
-    
+    subplot(1,2,1);
+    plot(k,d(1:450));
+    title('Eigenvalue number k against k');
+    xlabel('k');
+    ylabel('Eigenvalue number k');
+
     % Plot the sum of top k eigenvalues, expressed as a fraction of the sum of all eigenvalues, against k
-    %%%%% TODO: Compute eigen fractions
-    
+    %Compute eigen fractions
+    p = zeros(1,450);
+    for i = k
+        p(i) = sum(d(1:i))/sum(d);
+    end
+    p = round(p,2); %round to 2 decimal places
+
     subplot(1,2,2)
-    %%%%% TODO
+    plot(k,p);
+    title('Fraction of Variance Explained');
+    xlabel('k');
+    ylabel('Eigen Fraction');
     
     % find & report k for which the eigen fraction = [0.51, 0.75, 0.9, 0.95, 0.99]
     ef = [0.51, 0.75, 0.9, 0.95, 0.99];
@@ -176,4 +189,4 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     %%%%% TODO
     
     hold off    
-end
+%end
