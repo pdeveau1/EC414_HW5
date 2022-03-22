@@ -97,7 +97,11 @@
     eigenfaces = zeros(10304,length(K));
     eigenfaces(:,1) = mu_x;
     for i = 2:length(K);
-        eigenfaces(:,i) = mu_x + dot(sum(Y(:,1:K(i)),2),U(:,i));
+        sum_pca = 0;
+        for j = 1:K(i);
+            sum_pca = sum_pca + dot(Y(:,i),U(:,i));
+        end
+        eigenfaces(:,i) = mu_x + sum_pca;
     end
 
     % add eigen faces weighted by eigen face coefficients to the mean face
@@ -114,7 +118,7 @@
         subplot(2,5,i)
         imshow(uint8(reshape(eigenfaces(:,i), img_size)));
         titl = sprintf('Eigenface for k = %d',K(i));
-        title('titl');
+        title(titl);
     end
     
 %% Q5.2 d) Principal components capture different image characteristics
