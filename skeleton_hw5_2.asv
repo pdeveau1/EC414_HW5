@@ -18,16 +18,11 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     %Sx is the covariance matrix
     Sx = (1/n) * X_tilde * X_tilde'; %size should be d x d = 10304 x 10304
     %% Compute the eigenvalue decomposition of the covariance matrix
-    %e = eig(Sx); %column vector containing the eigenvalues
-    %D = eig(Sx, 'matrix'); %eigenvalues in a diagonal matrix.
-    [V,D] = eig(Sx); %diagonal matrix D of eigenvalues and matrix V whose columns are the corresponding right eigenvectors, so that A*V = V*D
+    e = eig(Sx); %column vector containing the eigenvalues
+    D = eig(Sx, 'matrix'); %eigenvalues in a diagonal matrix.
     %% Sort the eigenvalues and their corresponding eigenvectors construct the U and Lambda matrices
-    [d,ind] = sort(diag(D)); %sort eigenvalues and get corresponding indices
-    Ds = D(ind,ind); %reorder eigenvalues in diagonal matrix
-    Vs = V(:,ind); %reorder eigenvectors
-
-    Lambda = Ds;
-    U = Vs;
+    %%%%% TODO
+    e = sort(e,'descend')
     %% Compute the principal components: Y
     %%%%% TODO
 
