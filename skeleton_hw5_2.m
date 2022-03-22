@@ -82,8 +82,10 @@
     
     % find & report k for which the eigen fraction = [0.51, 0.75, 0.9, 0.95, 0.99]
     ef = [0.51, 0.75, 0.9, 0.95, 0.99];
-    %%%%% TODO (Hint: ismember())
-    % k_ = ?; %%%%% TODO
+    [memb_ef, loc_ef] = ismember(ef,p); %loc_ef contains lowest absolute index of p for each element in ef that is a member of p 
+    k_ = loc_ef;
+    fprintf('The smallest values of k for which ρk ≥ 0.51, 0.75, 0.90, 0.95, and 0.99 is \n');
+    disp(k_);
     
 %% Q5.2 c) Approximating an image using eigen faces
     test_img_idx = 43;
