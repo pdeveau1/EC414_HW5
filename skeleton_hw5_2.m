@@ -7,7 +7,7 @@
     %image #120 in the data set
     face_120 = faces(120,:);
     mean_face = mean(faces,1);  
-
+    X = faces;
     [n, d] = size(faces);
     %% Compute mean face and the covariance matrix of faces
     mu_x = mean(faces',2); %d x 1 = 10304 x 1
@@ -29,7 +29,7 @@
     Lambda = Ds;
     U = Vs;
     %% Compute the principal components: Y
-    %%%%% TODO
+    Y = U' * (faces'-mu_x);
 
 %% Q5.2 a) Visualize the loaded images and the mean face image
     figure(1)
@@ -93,7 +93,13 @@
     % Compute eigenface coefficients
     %%%% TODO
     
-    K = [0,1,2,k_,400,d];
+    K = [0,1,2,k_,400];
+    eigenfaces = zeros(10304,length(K));
+    eigenfaces(:,1) = mu_x;
+    for i = 2:length(K);
+        eigenfaces(:,i) = mu_x + dot(sum(Y(:,1:K(i)),2),U(:,i));
+    end
+
     % add eigen faces weighted by eigen face coefficients to the mean face
     % for each K value
     % 0 corresponds to adding nothing to the mean face
@@ -104,7 +110,13 @@
     
     figure(3)
     sgtitle('Approximating original image by adding eigen faces')
-
+    for i = 1:length(K)
+        subplot(2,5,i)
+        imshow(uint8(reshape(eigenfaces(:,i), img_size)));
+        titl = sprintf('Eigenface for k = %d',K(i));
+        title('titl');
+    end
+    
 %% Q5.2 d) Principal components capture different image characteristics
 %% Loading and pre-processing MNIST Data-set
     % Data Prameters
