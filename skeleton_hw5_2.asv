@@ -16,20 +16,24 @@
     X_tilde = faces' - mu_x * one_n'; %mean-centered feature vector, should be d x n = 10304 x 400
     % Compute covariance matrix using X_tilde
     %Sx is the covariance matrix
-    Sx = (1/n) * X_tilde * X_tilde'; %size should be d x d = 10304 x 10304
+    Sx = (1/n) .* (X_tilde * X_tilde'); %size should be d x d = 10304 x 10304
     %% Compute the eigenvalue decomposition of the covariance matrix
     %e = eig(Sx); %column vector containing the eigenvalues
     %D = eig(Sx, 'matrix'); %eigenvalues in a diagonal matrix.
-    [V,D] = eig(Sx); %diagonal matrix D of eigenvalues and matrix V whose columns are the corresponding right eigenvectors, so that A*V = V*D
+    %[V,D] = eig(Sx); %diagonal matrix D of eigenvalues and matrix V whose columns are the corresponding right eigenvectors, so that A*V = V*D
+    [V,D] = eig(X_tilde' * X_tilde);
+    D = (1/n) .* D
     %% Sort the eigenvalues and their corresponding eigenvectors construct the U and Lambda matrices
-    [d,ind] = sort(diag(D),'descend'); %sort eigenvalues and get corresponding indices
+    [ds,ind] = sort(diag(D),'descend'); %sort eigenvalues and get corresponding indices
     Ds = D(ind,ind); %reorder eigenvalues in diagonal matrix
     Vs = V(:,ind); %reorder eigenvectors
-
+    
+    ds = [ds;zeros(50,1)];
+    
     Lambda = Ds;
     U = Vs;
     %% Compute the principal components: Y
-    Y = U' * (faces'-mu_x);
+    %Y = U' * (faces'-mu_x);
 
 %% Q5.2 a) Visualize the loaded images and the mean face image
     figure(1)
@@ -50,7 +54,7 @@
     warning('off')
     
     % Report the top 5 eigenvalues
-    lambda_top5 = d(1:5); 
+    lambda_top5 = ds(1:5); 
     fprintf('The top 5 eigenvalues are \n');
     disp(lambda_top5);
 
@@ -61,7 +65,7 @@
 
     % Plot the eigenvalue number k against k
     subplot(1,2,1);
-    plot(k,d(1:450));
+    plot(k,ds);
     title('Eigenvalue number k against k');
     xlabel('k');
     ylabel('Eigenvalue number k');
@@ -70,7 +74,7 @@
     %Compute eigen fractions
     p = zeros(1,450);
     for i = k
-        p(i) = sum(d(1:i))/sum(d);
+        p(i) = sum(ds(1:i))/sum(ds);
     end
     p = round(p,2); %round to 2 decimal places
 
@@ -94,10 +98,17 @@
     %%%% TODO
     
     K = [0,1,2,k_,400];
-    eigenfaces = zeros(10304,length(K));
+    eigenfaces = zeros(10304,length(K) + 1);
     eigenfaces(:,1) = mu_x;
-    for i = 2:length(K);
-        eigenfaces(:,i) = mu_x + sum(Y(:,1:K(i))) * U(:,i);
+    eigenfaces(:,length(K) + 1) = test_img;
+    for i = 2:length(K)
+        sum_pca = 0;
+        for j = 1:K(i)
+            u = (U(i,:));
+            ypca = u'*(test_img - mu_x');
+            sum_pca = sum_pca + dot(ypca,u);
+        end
+        eigenfaces(:,i) = mu_x + sum_pca;
     end
 
     % add eigen faces weighted by eigen face coefficients to the mean face
@@ -114,9 +125,11 @@
         subplot(2,5,i)
         imshow(uint8(reshape(eigenfaces(:,i), img_size)));
         titl = sprintf('Eigenface for k = %d',K(i));
-        title('titl');
+        title(titl);
     end
-    
+    subplot(2,5,i + 1)
+    imshow(uint8(reshape(eigenfaces(:,i + 1), img_size)));
+    title('Image #43');
 %% Q5.2 d) Principal components capture different image characteristics
 %% Loading and pre-processing MNIST Data-set
     % Data Prameters
@@ -130,14 +143,17 @@
     X = mnist(:,(2:end));
     num_idx = (label == noi);
     X = X(num_idx,:);
-    [n,~] = size(X);
-    
+    X = X';
+    [d,n] = size(X);
+
     %% Compute the mean face and the covariance matrix
+    mu_x = mean(X,2); %d x 1 = 256 x 1
+    one_n = ones(n,1); % n x 1 = 658 x 1
     % compute X_tilde
-    %%%%% TODO
-    
-    % Compute covariance using X_tilde
-    %%%%% TODO
+    X_tilde = X - mu_x * one_n'; %mean-centered feature vector, should be d x n = 256 x 658
+    % Compute covariance matrix using X_tilde
+    %Sx is the covariance matrix
+    Sx = (1/n) .* (X_tilde * X_tilde'); %size should be d x d = 256 x 256
     
     %% Compute the eigenvalue decomposition
     %%%%% TODO
