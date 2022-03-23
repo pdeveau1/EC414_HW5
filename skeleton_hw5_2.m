@@ -1,26 +1,41 @@
-function [lambda_top5, k_] = skeleton_hw5_2()
+%function [lambda_top5, k_] = skeleton_hw5_2()
 %% Q5.2
 %% Load AT&T Face dataset
     img_size = [112,92];   % image size (rows,columns)
     % Load the AT&T Face data set using load_faces()
     %%%%% TODO
-
+    faces = load_faces();
+    X = faces'; %d x n fature matrix
+    [d,n] = size(X);
+    one_n = ones(n,1); %n x 1 "all ones" vector
+    %mu_x = (1/n) * X * one_n; %d x 1 empirical mean feature vector
+    %mu_x = (1/n) * sum(X,2); %d x 1 empirical mean feature vector
+    mu_x = mean(X,2);
     %% Compute mean face and the covariance matrix of faces
     % compute X_tilde1
-    %%%%% TODO
+    X_tilde = X - mu_x * one_n'; %d x n mean-centered feature matrix
     
     % Compute covariance matrix using X_tilde
-    %%%%% TODO
+    Sx = (1/n) * X_tilde * X_tilde'; %d x d empirical covariance matrix of feature vectors
     
     %% Compute the eigenvalue decomposition of the covariance matrix
-    %%%%% TODO
+    [V,D] = eig(X_tilde' * X_tilde); %diagonal matrix D of eigenvalues and matrix V whose columns are the corresponding right eigen vectors
     
     %% Sort the eigenvalues and their corresponding eigenvectors construct the U and Lambda matrices
-    %%%%% TODO
+    [ds,ind] = sort(diag(D),'descend');
+    Ds = D(ind,ind);
+    Vs = V(:,ind);
     
+    U = zeros(d,d);
+    for i = 1:n
+        U(:,i) = (1/sqrt(ds(i))) * X_tilde * Vs(:,i);
+    end
+    Lambda = zeros(d,d);
+    Lambda(1:n,1:n) = (1/n) * Ds;
     %% Compute the principal components: Y
     %%%%% TODO
-
+    WPCA = U;
+    yPCA = WPCA' * (X - mu_x);
 %% Q5.2 a) Visualize the loaded images and the mean face image
     figure(1)
     sgtitle('Data Visualization')
@@ -28,45 +43,78 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     % Visualize image number 120 in the dataset
     % practice using subplots for later parts
     subplot(1,2,1)
-    %%%%% TODO
+    imshow(uint8(reshape(X(:,120)', img_size)));
+    title('image #120 in the dataset')
     
     % Visualize the mean face image
     subplot(1,2,2)
-    %%%%% TODO
+    imshow(uint8(reshape(mu_x', img_size)));
+    title('mean face of the dataset')
     
+    fprintf('The mean face resembles a smooth shapeless "blob"\n');
 %% Q5.2 b) Analysing computed eigenvalues
     warning('off')
     
     % Report the top 5 eigenvalues
-    % lambda_top5 = ?; %%%%% TODO
+    lambda_top5 = ds(1:5);
+    fprintf('The first five eigenvalues are\n');
+    disp(lambda_top5);
     
     % Plot the eigenvalues in from largest to smallest
+    d = 450
     k = 1:d;
+    Lambdas = diag(Lambda);
     figure(2)
     sgtitle('Eigenvalues from largest to smallest')
 
     % Plot the eigenvalue number k against k
-    subplot(1,2,1)
-    %%%%% TODO
+    subplot(1,2,1);
+    plot(k,Lambdas(1:d));
+    title('Eigenvalues');
+    xlabel('k');
+    ylabel('Lambda of k');
     
     % Plot the sum of top k eigenvalues, expressed as a fraction of the sum of all eigenvalues, against k
     %%%%% TODO: Compute eigen fractions
-    
-    subplot(1,2,2)
-    %%%%% TODO
+    p = zeros(d,1);
+    for i = k
+        p(i) = sum(Lambdas(1:i))/sum(Lambdas(1:d));
+    end
+    p = round(p,2);
+    subplot(1,2,2);
+    plot(k,p);
+    title('Fraction of Variance Explained');
+    xlabel('k');
+    ylabel('p of k');
     
     % find & report k for which the eigen fraction = [0.51, 0.75, 0.9, 0.95, 0.99]
     ef = [0.51, 0.75, 0.9, 0.95, 0.99];
-    %%%%% TODO (Hint: ismember())
-    % k_ = ?; %%%%% TODO
+    [li_ef, loc_p] = ismember(ef,p);
+    k_ = loc_p;
+
+    fprintf('The smallest values of k for which ρk ≥ 0.51, 0.75, 0.90, 0.95, and 0.99 \n');
+    disp(k_);
     
 %% Q5.2 c) Approximating an image using eigen faces
     test_img_idx = 43;
-    test_img = X(test_img_idx,:);    
+    test_img = X(:,test_img_idx);    
     % Compute eigenface coefficients
-    %%%% TODO
+    ypca = zeros(10304,d);
+    for i = 1:d
+        ypca(:,i) = dot((test_img - mu_x),U(:,i));
+    end
     
     K = [0,1,2,k_,400,d];
+    pca = zeros(10304,length(K));
+    for i = 1:length(K)
+        sumpca = zeros(10304,1);
+        for j = 1:K(i)
+            u = U(:,j);
+            ypca = u' * (test_img - mu_x);
+            sumpca = sumpca + (ypca * u);
+        end
+        pca(:,i) = mu_x + sumpca;
+    end
     % add eigen faces weighted by eigen face coefficients to the mean face
     % for each K value
     % 0 corresponds to adding nothing to the mean face
@@ -77,7 +125,12 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     
     figure(3)
     sgtitle('Approximating original image by adding eigen faces')
-
+    for i = 1:length(K)
+        subplot(2,5,i)
+        imshow(uint8(reshape(pca(:,i)', img_size)));
+        titl = sprintf('image #43 with %d principal components',K(i));
+        title(titl);
+    end
 %% Q5.2 d) Principal components capture different image characteristics
 %% Loading and pre-processing MNIST Data-set
     % Data Prameters
@@ -164,4 +217,4 @@ function [lambda_top5, k_] = skeleton_hw5_2()
     %%%%% TODO
     
     hold off    
-end
+%end
