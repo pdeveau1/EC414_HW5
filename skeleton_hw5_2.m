@@ -144,20 +144,35 @@
     X = mnist(:,(2:end));
     num_idx = (label == noi);
     X = X(num_idx,:);
-    [n,~] = size(X);
+    %[n,~] = size(X);
     
-    %% Compute the mean face and the covariance matrix
-    % compute X_tilde
-    %%%%% TODO
+    X = X'; %d x n fature matrix
+    [d,n] = size(X);
+    one_n = ones(n,1); %n x 1 "all ones" vector
+    %mu_x = (1/n) * X * one_n; %d x 1 empirical mean feature vector
+    %mu_x = (1/n) * sum(X,2); %d x 1 empirical mean feature vector
+    mu_x = mean(X,2);
+    %% Compute mean face and the covariance matrix of faces
+    % compute X_tilde1
+    X_tilde = X - mu_x * one_n'; %d x n mean-centered feature matrix
     
-    % Compute covariance using X_tilde
-    %%%%% TODO
+    % Compute covariance matrix using X_tilde
+    Sx = (1/n) * X_tilde * X_tilde'; %d x d empirical covariance matrix of feature vectors
     
-    %% Compute the eigenvalue decomposition
-    %%%%% TODO
+    %% Compute the eigenvalue decomposition of the covariance matrix
+    [V,D] = eig(X_tilde' * X_tilde); %diagonal matrix D of eigenvalues and matrix V whose columns are the corresponding right eigen vectors
     
-    %% Sort the eigenvalues and their corresponding eigenvectors in the order of decreasing eigenvalues.
-    %%%%% TODO
+    %% Sort the eigenvalues and their corresponding eigenvectors construct the U and Lambda matrices
+    [ds,ind] = sort(diag(D),'descend');
+    Ds = D(ind,ind);
+    Vs = V(:,ind);
+    
+    U = zeros(d,d);
+    for i = 1:n
+        U(:,i) = (1/sqrt(ds(i))) * X_tilde * Vs(:,i);
+    end
+    Lambda = zeros(d,d);
+    Lambda(1:n,1:n) = (1/n) * Ds;
     
     %% Compute principal components
     %%%%% TODO
@@ -182,14 +197,15 @@
     figure(4)
     sgtitle('Data Visualization')
 
-    % Visualize the 100th image
+    % Visualize the 120th image
     subplot(1,2,1)
-    %%%%% TODO
+    imshow((reshape(X(:,120)', img_size)));
+    title('Image #120 of the Numeral ''3''');
     
-    % Mean face image
+    % Mean image of the numeral '3'
     subplot(1,2,2)
-    %%%%% TODO
-
+    imshow((reshape(mu_x', img_size)));
+    title('Mean Image of the Numeral ''3''');
     
     %% Image projections onto principal components and their corresponding features
     
