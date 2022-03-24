@@ -1,4 +1,4 @@
-%function [lambda_top5, k_] = skeleton_hw5_2()
+function [lambda_top5, k_] = skeleton_hw5_2()
 %% Q5.2
 %% Load AT&T Face dataset
     img_size = [112,92];   % image size (rows,columns)
@@ -61,7 +61,7 @@
     disp(lambda_top5);
     
     % Plot the eigenvalues in from largest to smallest
-    d = 450
+    d = 450;
     k = 1:d;
     Lambdas = diag(Lambda);
     figure(2)
@@ -99,10 +99,10 @@
     test_img_idx = 43;
     test_img = X(:,test_img_idx);    
     % Compute eigenface coefficients
-    ypca = zeros(10304,d);
-    for i = 1:d
-        ypca(:,i) = dot((test_img - mu_x),U(:,i));
-    end
+%     ypca = zeros(10304,d);
+%     for i = 1:d
+%         ypca(:,i) = dot((test_img - mu_x),U(:,i));
+%     end
     
     K = [0,1,2,k_,400,d];
     pca = zeros(10304,length(K));
@@ -178,18 +178,35 @@
     %%%%% TODO
     
     %% Computing the first 2 pricipal components
-    %%%%% TODO
+    first_ypca = zeros(1,n);
+    for i = 1:n
+        u = U(:,1);
+        first_ypca(i) = u' * (X(:,i) - mu_x);
+    end
+    second_ypca = zeros(1,n);
+    for i = 1:n
+        u = U(:,2);
+        second_ypca(i) = (u' * (X(:,i) - mu_x));
+    end
 
     % finding percentile points
     percentile_vals = [5, 25, 50, 75, 95];
     %%%%% TODO (Hint: Use the provided fucntion - percentile_points())
-    
+    %pv_1 = zeros(5,)
+    pv_1 = percentile_values(first_ypca',percentile_vals);
+    pv_2 = percentile_values(second_ypca',percentile_vals);
     % Finding the cartesian product of percentile points to find grid corners
-    %%%%% TODO
+    [x,y] = meshgrid(pv_1,pv_2);
+    result = [x(:) y(:)];
 
+    %[A{1:2}] = ngrid([pv_1' pv_2']);
+    %G(:,1) = A{1}(:);
+    %G(:,2) = A{2}(:);
+    %result = unique(G,'rows');
+    
     
     %% Find images whose PCA coordinates are closest to the grid coordinates 
-    
+    [k,dist] = dsearchn([first_ypca' second_ypca'],result);
     %%%%% TODO
 
     %% Visualize loaded images
@@ -218,10 +235,14 @@
     % percentile grid corners
     
     %%%%% TODO (hint: Use xticks and yticks)
-
+    scatter(first_ypca,second_ypca)
     xlabel('Principal component 1')
     ylabel('Principal component 2')
     title('Image points closest to percentile grid corners')
+    xticks(sort(pv_1))
+    yticks(sort(pv_2))
+    scatter(first_ypca(k),second_ypca(k),'or','filled');
+    %scatter(result(:,1),result(:,2),'*g')
     hold off
     
     figure(6)
@@ -229,8 +250,14 @@
     hold on
     % Plot the images whose PCA coordinates are closest to the percentile grid 
     % corners. Use subplot to put all images in a single figure in a grid.
-    
+    %k = sort(k);
+    for i = 1:length(k)
+        subplot(5,5,i)
+        imshow((reshape(X(:,k(i)), img_size)));
+        titl = sprintf('Image %d',k(i));
+        title(titl);
+    end
     %%%%% TODO
     
     hold off    
-%end
+end
